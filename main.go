@@ -1,47 +1,43 @@
 package main
 
 import (
-	"fmt"
+	"flag"
+	mAuth "github.com/KristinaEtc/auth/auth"
+	"github.com/KristinaEtc/slflog"
 	auth "github.com/abbot/go-http-auth"
 	gin "github.com/gin-gonic/gin"
+	"github.com/ventu-io/slf"
 )
 
 func Secret(user, realm string) string {
 	if user == "john" {
+		//password is hello
 		return "b98e16cbc3d01734b264adba7baa3bf9"
 	}
 	return ""
 }
 
-func DigestAuth(a *auth.DigestAuth) (result gin.HandlerFunc) {
-	return func(c *gin.Context) {
-		r := c.Request
-		w := c.Writer
-
-		if username, authinfo := a.CheckAuth(r); username == "" {
-			a.RequireAuth(w, r)
-			fmt.Println("sended")
-
-		} else {
-			ar := &auth.AuthenticatedRequest{Request: *r, Username: username}
-			if authinfo != nil {
-				fmt.Println("check")
-				w.Header().Set("Authentication-Info", *authinfo)
-				//c.Next()
-			}
-			c.Request = &ar.Request
-			return
-		}
-	}
-}
+var (
+	helpFlag       = flag.Bool("help", false, "Show this help text")
+	configAuthFile = flag.String("userpwd", "auth.json", "configfile with logins and passwords")
+	logPath        = flag.String("logpath", "/home/k/work/go/src/github.com/KristinaEtc/auth/logs", "path to logfiles")
+	logLevel       = flag.String("loglevel", "DEBUG", "INFO, DEBUG, ERROR, WARN, PANIC, FATAL - loglevel for stderr")
+)
 
 func main() {
 
+	flag.Parse()
+
+	slflog.InitLoggers(*logPath, *logLevel)
+	// TODO: add Close method!!
+	log := slf.WithContext("main-auth.go")
+
 	authenticator := auth.NewDigestAuthenticator("example.com", Secret)
+	log.Debug("starting working")
 
 	r := gin.New()
 
-	r.Use(DigestAuth(authenticator))
+	r.Use(mAuth.DigestAuth(authenticator))
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
