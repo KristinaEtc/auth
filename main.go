@@ -9,13 +9,11 @@ import (
 	"github.com/ventu-io/slf"
 )
 
-func Secret(user, realm string) string {
-	if user == "john" {
-		//password is hello
-		return "b98e16cbc3d01734b264adba7baa3bf9"
+/*func Secret(user, realm string) string {
+	if userData, userExists := mAuth.FindUser(user); userExists {
+		return userData.DigestHash
 	}
-	return ""
-}
+}*/
 
 var (
 	helpFlag       = flag.Bool("help", false, "Show this help text")
@@ -30,14 +28,19 @@ func main() {
 
 	slflog.InitLoggers(*logPath, *logLevel)
 	// TODO: add Close method!!
-	log := slf.WithContext("main-auth.go")
+	log := slf.WithContext("main.go")
 
-	authenticator := auth.NewDigestAuthenticator("example.com", Secret)
+	uData := mAuth.InitCustomUserData(*configAuthFile)
+
+	authenticator := auth.NewDigestAuthenticator("Authentication", func(user, realm string) string {
+		if userData, userExists := uData.FindUser(user); userExists {
+			return userData.DigestHash
+		}
+		return ""
+	})
 	log.Debug("starting working")
 
 	r := gin.New()
-
-	mAuth.InitCustomUserData(*configAuthFile)
 
 	r.Use(mAuth.DigestAuth(authenticator))
 	r.GET("/ping", func(c *gin.Context) {
