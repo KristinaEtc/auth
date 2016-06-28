@@ -4,23 +4,12 @@ import (
 	auth "github.com/abbot/go-http-auth"
 	gin "github.com/gin-gonic/gin"
 	"github.com/ventu-io/slf"
-	"sync"
 )
 
 const pwdCurr string = "github.com/KristinaEtc/auth"
 
-var log slf.StructuredLogger
-var once sync.Once
-
-func initLogger() {
-	once.Do(func() {
-		log = slf.WithContext(pwdCurr)
-	})
-	return
-}
-
 func DigestAuth(a *auth.DigestAuth) (result gin.HandlerFunc) {
-	initLogger()
+
 	defer log.WithFields(slf.Fields{
 		"func": "DigestAuth",
 	}).Info("working middleware")

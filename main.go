@@ -19,7 +19,7 @@ func Secret(user, realm string) string {
 
 var (
 	helpFlag       = flag.Bool("help", false, "Show this help text")
-	configAuthFile = flag.String("userpwd", "auth.json", "configfile with logins and passwords")
+	configAuthFile = flag.String("userpwd", "webauth.json", "configfile with logins and passwords")
 	logPath        = flag.String("logpath", "/home/k/work/go/src/github.com/KristinaEtc/auth/logs", "path to logfiles")
 	logLevel       = flag.String("loglevel", "DEBUG", "INFO, DEBUG, ERROR, WARN, PANIC, FATAL - loglevel for stderr")
 )
@@ -36,6 +36,8 @@ func main() {
 	log.Debug("starting working")
 
 	r := gin.New()
+
+	mAuth.InitCustomUserData(*configAuthFile)
 
 	r.Use(mAuth.DigestAuth(authenticator))
 	r.GET("/ping", func(c *gin.Context) {
