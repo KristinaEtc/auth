@@ -8,7 +8,7 @@ import (
 	//dAuth "github.com/abbot/go-http-auth"
 	gin "github.com/gin-gonic/gin"
 	"github.com/ventu-io/slf"
-	webauth "tekinsoft/web"
+	//webauth "tekinsoft/web"
 )
 
 func Secret(user, realm string) string {
@@ -23,9 +23,11 @@ func main() {
 	log := slf.WithContext("main.go")
 	log.Info("test")
 
-	webauth.ConfigureFromFile("./webauthfull.json")
+	//webauth.ConfigureFromFile("./webauthfull.json")
 	r := gin.New()
+
 	r.Use(auth.MultiAuthMiddleware())
+	r.Use(auth.MiddleSecond())
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -35,22 +37,4 @@ func main() {
 
 	// Listen and server on 0.0.0.0:8080
 	r.Run(":8080")
-
 }
-
-/*func main() {
-	r := gin.New()
-	//r.Use()
-
-	r.Use(TestMiddle())
-	r.Use(TestMiddleSecond())
-
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-
-	// Listen and server on 0.0.0.0:8080
-	r.Run(":8080")
-}*/

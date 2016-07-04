@@ -17,8 +17,8 @@ type authParams struct {
 	hdrAuthorization string
 }
 
-func MultiAuthMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func MultiAuthMiddleware() func(*gin.Context) gin.HandlerFunc {
+	return func(c *gin.Context) gin.HandlerFunc {
 		a := &authParams{hdrAuthorization: c.Request.Header.Get("Authorization"),
 			uri:  c.Request.URL.Path,
 			verb: c.Request.Method,
@@ -27,15 +27,17 @@ func MultiAuthMiddleware() gin.HandlerFunc {
 		a.ip = net.ParseIP(a.addr)
 
 		var one int = 1
+		var f gin.HandlerFunc
 		log.Debug("//Test Multi Auth Middleware///")
 		switch one {
 		case 1:
-			return TestBasicA(a)
+			f = TestBasicA(a)
 		case 2:
-			return TestDigestN(a)
+			f = TestDigestN(a)
 		default:
-			return TestTrust(a)
+			f = TestTrust(a)
 		}
+		return f
 	}
 }
 
@@ -64,25 +66,8 @@ func TestTrust(a *authParams) gin.HandlerFunc {
 	}
 }
 
-func TestMiddleSecond() gin.HandlerFunc {
+func MiddleSecond() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Debug("///Test Middle Second///")
 	}
 }
-
-/*func main() {
-	r := gin.New()
-	//r.Use()
-
-	r.Use(TestMiddle())
-	r.Use(TestMiddleSecond())
-
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-
-	// Listen and server on 0.0.0.0:8080
-	r.Run(":8080")
-}*/
