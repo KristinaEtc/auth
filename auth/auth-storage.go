@@ -1,6 +1,6 @@
 package auth
 
-import (
+/*import (
 	//"buf"
 	"bytes"
 	//"bufio"
@@ -8,19 +8,7 @@ import (
 	"github.com/ventu-io/slf"
 	"io"
 	"os"
-	"sync"
 )
-
-var log slf.StructuredLogger
-var once sync.Once
-
-func initLogger() {
-	once.Do(func() {
-		//GetStorage
-		log = slf.WithContext(pwdCurr)
-	})
-	return
-}
 
 //--------------------------------
 //  Factory for user/pwd storage
@@ -29,10 +17,18 @@ type UserRepository interface {
 	FindUser(string) (*UserData, bool)
 }
 
-type UserData struct {
-	Login      string `json:Login`
-	Passcode   string `json:Passcode`
-	DigestHash string `json:DigestHash`
+type UserAccounts struct {
+	User       string   `json:User`
+	Pass       string   `json:Pass`
+	DigestHash string   `json:DigestHash`
+	Groups     []string `json:Groups`
+}
+
+type AuthOptions struct {
+	Verb   string
+	Uri    []string
+	Auth   []string
+	Groups []string
 }
 
 //--------------------------------
@@ -41,14 +37,6 @@ type UserData struct {
 
 type FileRepository struct {
 	userData map[string]UserData
-}
-
-func InitCustomUserData(configFile string) UserRepository {
-	initLogger()
-
-	fRep := &FileRepository{}
-	fRep.initFileRepository(configFile)
-	return fRep
 }
 
 func (f *FileRepository) initFileRepository(configFile string) UserRepository {
@@ -103,3 +91,4 @@ func (f *FileRepository) FindUser(login string) (*UserData, bool) {
 	log.WithFields(slf.Fields{"login": "DigestAuth"}).Warn("User with login not found")
 	return nil, false
 }
+*/

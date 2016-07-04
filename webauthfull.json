@@ -1,0 +1,17 @@
+{
+    "bindingaddr": "0.0.0.0:8080",
+
+    "authoptions": [
+        { "verb" : "*",   "uri" : "/ping",   "auth": "basic",   "groups" : "group1",      "networks" : "192.168.1.3, 192.168.240.0/24" },
+        { "verb" : "*",   "uri" : "/ping",   "auth": "basic",   "groups" : "group3",           "networks" : "127.0.0.1" }
+        { "verb" : "*",   "uri" : "/ping",   "auth": "digest",   "groups" : "group2",		"networks" : "127.0.0.1" }
+        { "verb" : "*",   "uri" : "/ping",   "auth": "basic",   "groups" : "group3",           "networks" : "127.0.0.1" }      
+    ],
+
+    "useraccounts": [
+         {"user" : "user1" ,  "pass" : "111",   "groups" : "group1"},
+         {"user" : "user2" ,  "pass" : "222",  "groups"  : "group2"},
+         {"user" : "user3" ,  "pass" : "333",  "groups"  : "group3"}
+    ]
+
+}

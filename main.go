@@ -1,48 +1,32 @@
 package main
 
+import _ "github.com/KristinaEtc/slflog"
+
 import (
-	"flag"
-	mAuth "github.com/KristinaEtc/auth/auth"
-	"github.com/KristinaEtc/slflog"
-	auth "github.com/abbot/go-http-auth"
+	//"fmt"
+	auth "github.com/KristinaEtc/auth/auth"
+	//dAuth "github.com/abbot/go-http-auth"
 	gin "github.com/gin-gonic/gin"
 	"github.com/ventu-io/slf"
+	webauth "tekinsoft/web"
 )
 
-/*func Secret(user, realm string) string {
-	if userData, userExists := mAuth.FindUser(user); userExists {
-		return userData.DigestHash
+func Secret(user, realm string) string {
+	if user == "john" {
+		return "b98e16cbc3d01734b264adba7baa3bf9"
 	}
-}*/
-
-var (
-	helpFlag       = flag.Bool("help", false, "Show this help text")
-	configAuthFile = flag.String("userpwd", "webauth.json", "configfile with logins and passwords")
-	logPath        = flag.String("logpath", "/home/k/work/go/src/github.com/KristinaEtc/auth/logs", "path to logfiles")
-	logLevel       = flag.String("loglevel", "DEBUG", "INFO, DEBUG, ERROR, WARN, PANIC, FATAL - loglevel for stderr")
-)
+	return ""
+}
 
 func main() {
 
-	flag.Parse()
-
-	slflog.InitLoggers(*logPath, *logLevel)
-	// TODO: add Close method!!
 	log := slf.WithContext("main.go")
+	log.Info("test")
 
-	uData := mAuth.InitCustomUserData(*configAuthFile)
-
-	authenticator := auth.NewDigestAuthenticator("Authentication", func(user, realm string) string {
-		if userData, userExists := uData.FindUser(user); userExists {
-			return userData.DigestHash
-		}
-		return ""
-	})
-	log.Debug("starting working")
-
+	webauth.ConfigureFromFile("./webauthfull.json")
 	r := gin.New()
+	r.Use(auth.MultiAuthMiddleware())
 
-	r.Use(mAuth.DigestAuth(authenticator))
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
@@ -51,4 +35,22 @@ func main() {
 
 	// Listen and server on 0.0.0.0:8080
 	r.Run(":8080")
+
 }
+
+/*func main() {
+	r := gin.New()
+	//r.Use()
+
+	r.Use(TestMiddle())
+	r.Use(TestMiddleSecond())
+
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
+
+	// Listen and server on 0.0.0.0:8080
+	r.Run(":8080")
+}*/
