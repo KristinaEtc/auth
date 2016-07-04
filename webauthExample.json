@@ -2,7 +2,7 @@
     "bindingaddr": "0.0.0.0:8080",
 
     "authoptions": [
-        { "verb" : "*",   "uri" : "/",   "auth": "basic",   "groups" : "group1",      "networks" : "192.168.1.3, 192.168.240.0/24" },
+        { "verb" : "*",   "uri" : "/",   "auth": "basic",   "groups" : "group1",      "networks" : "192.168.1.3, 192.168.240.0/24, 127.0.0.1" },
         { "verb" : "*",   "uri" : "/",   "auth": "basic",   "groups" : "*",           "networks" : "127.0.0.1" }
     ],
 
