@@ -18,29 +18,6 @@ func Secret(user, realm string) string {
 	return ""
 }
 
-/*func DigestAuth(a *auth.DigestAuth) (result gin.HandlerFunc) {
-	return func(c *gin.Context) {
-		r := c.Request
-		w := c.Writer
-
-		if username, authinfo := a.CheckAuth(r); username == "" {
-			a.RequireAuth(w, r)
-			fmt.Println("sended")
-
-		} else {
-			//fmt.Fprintln(c.Writer, "helloooo")
-			ar := &auth.AuthenticatedRequest{Request: *r, Username: username}
-			if authinfo != nil {
-				fmt.Println("check")
-				w.Header().Set("Authentication-Info", *authinfo)
-				//c.Next()
-			}
-			c.Request = &ar.Request
-			return
-		}
-	}
-}*/
-
 func main() {
 
 	log := slf.WithContext("stomp-client.go")
