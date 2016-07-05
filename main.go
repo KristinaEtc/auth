@@ -23,7 +23,7 @@ func main() {
 	log := slf.WithContext("stomp-client.go")
 	log.Info("test")
 
-	authenticator := authD.NewDigestAuthenticator("example.com", Secret)
+	authenticator := authD.NewDigestAuthenticator("Authorization", Secret)
 	webauth.ConfigureFromFile("./webauth.json")
 	r := gin.New()
 
