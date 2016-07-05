@@ -23,13 +23,15 @@ func main() {
 	log := slf.WithContext("main.go")
 	log.Info("test")
 
-	webauth.ConfigureFromFile("./webauthExample.json")
+	webauth.ConfigureFromFile("./webauth.json")
 	r := gin.New()
 
 	r.Use(auth.MultiAuthMiddleware())
+	r.Use(auth.BasicMiddleware())
+	r.Use(auth.DigestMiddleware())
 	r.Use(auth.MiddleSecond())
 
-	r.GET("/ping", func(c *gin.Context) {
+	r.GET("/status", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
