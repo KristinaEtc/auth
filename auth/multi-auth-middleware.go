@@ -23,10 +23,10 @@ type authParams struct {
 func MultiAuthMiddleware() gin.HandlerFunc {
 
 	log.Debug("MultiAuthMiddleware")
-	for _, item := range webauth.Configuration.AuthOptions {
-		log.Debugf("%v+++\n", item.Ipnets)
-	}
+
 	return func(c *gin.Context) {
+
+		// request information struct for all middlewares
 		a := &authParams{hdrAuthorization: c.Request.Header.Get("Authorization"),
 			uri:  c.Request.URL.Path,
 			verb: c.Request.Method,
@@ -36,10 +36,10 @@ func MultiAuthMiddleware() gin.HandlerFunc {
 		if a.ip == nil {
 			log.Warnf("Error IP conversion from %s", c.ClientIP())
 		}
-
 		c.Set("a", a)
 		log.Debugf("MultiAuthMiddleware: %v\n", a)
 
+		// check if client has access for such uri (in configuration repository: file, DB, map of struct, etc...)
 		a.uri_lst = webauth.GetUriPatterns(webauth.Configuration.AuthOptions, a.uri, a.verb)
 		if len(a.uri_lst) == 0 {
 			log.Warnf("URI pattern not found [%s]", a.queryTitle)
@@ -53,7 +53,6 @@ func MultiAuthMiddleware() gin.HandlerFunc {
 
 		//check if clients network is enabled in found patterns
 		a.uri_lst = webauth.GetNetworkIsEnabled(a.uri_lst, a.ip)
-		log.Debugf("---------------ip: %s, /uri_list:  %v", a.ip.String(), a.uri_lst)
 		if len(a.uri_lst) == 0 {
 			log.Warnf("Forbidden network %s", a.queryTitle)
 			c.JSON(403, gin.H{
@@ -63,18 +62,20 @@ func MultiAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		// check authentication for a client
 		a.authType = webauth.GetAuthType(webauth.Configuration.AuthOptions, a.uri, a.verb)
 		c.Next()
 	}
 }
 
+// A middleware that implement digest authorization
 func DigestMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Debug("DigestMiddleware")
 		a := c.MustGet("a").(*authParams)
 
 		if a.authType == "digest" {
-			log.Debug("got it! digest")
+			// digest auth
 		} else {
 			c.Next()
 			return
@@ -82,33 +83,31 @@ func DigestMiddleware() gin.HandlerFunc {
 	}
 }
 
+// A middleware that implement basic authorization
 func BasicMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Debug("BasicMiddleware")
 
 		a := c.MustGet("a").(*authParams)
-		log.Debugf("a: %v\n", a)
 
 		if a.authType == "basic" {
-			log.Debug("got it! basic")
+			// basic auth
 		} else {
 			c.Next()
 			return
 		}
-
 		//c.Abort()
 	}
 }
 
-func TestTrust(a *authParams) gin.HandlerFunc {
+/*func TrustMiddleware(a *authParams) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		log.Debug("///Test Trust///")
-		//log.Println(myStruct.Test)
+		log.Debug("Trust Middleware")
 	}
-}
+}*/
 
-func MiddleSecond() gin.HandlerFunc {
+func MiddlewareSecond() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		log.Debug("///Test Middle Second///")
+		log.Debug("Test Middleware Second")
 	}
 }
