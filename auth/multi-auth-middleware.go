@@ -1,10 +1,13 @@
 package auth
 
 import (
+	dAuth "github.com/abbot/go-http-auth"
+	webauth "tekinsoft/web"
+
 	"github.com/gin-gonic/gin"
+	"github.com/ventu-io/slf"
 	"net"
 	"strings"
-	webauth "tekinsoft/web"
 )
 
 type authParams struct {
@@ -68,17 +71,44 @@ func MultiAuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-// A middleware that implement digest authorization
-func DigestMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		log.Debug("DigestMiddleware")
-		a := c.MustGet("a").(*authParams)
+func CheckDigestHash(user, realm string) string {
+	for userInfo, _ := range webauth.Configuration.UserAccounts {
+		if userInfo.User == user {
+			return userInfo.DigestHash
+		}
+	}
+	return ""
+}
 
-		if a.authType == "digest" {
-			// digest auth
-		} else {
-			c.Next()
-			return
+// A middleware that implement digest authorization
+func DigestAuth(a *dAuth.DigestAuth) (result gin.HandlerFunc) {
+
+	defer log.WithFields(slf.Fields{"func": "DigestAuth"})
+
+	return func(c *gin.Context) {
+		r := c.Request
+		w := c.Writer
+
+		//get request parametrs
+		reqAuthParams := c.MustGet("a").(*authParams)
+		if reqAuthParams.authType == "digest" {
+
+			//check if user was registered
+			if username, authinfo := a.CheckAuth(r); username == "" {
+				a.RequireAuth(w, r)
+				c.Abort()
+				log.Debug("sended")
+			} else {
+				// if he didn't - setting a header with digest request
+				ar := &dAuth.AuthenticatedRequest{Request: *r, Username: username}
+				if authinfo != nil {
+					log.Debug("check")
+					w.Header().Set("Authentication-Info", *authinfo)
+					//c.Next()
+				}
+				c.Request = &ar.Request
+				return
+			}
 		}
 	}
 }
