@@ -54,8 +54,8 @@ func ConfigureFromFile(configFile string) WebAuthConfig {
 
 	log.Debugf("Configure with config file %s", configFile)
 
-	dAuthenticator = authD.NewDigestAuthenticator("Authorization", GetDigestHash)
-	bAuthenticator = authD.NewBasicAuthenticator("Authorization", GetBasicHash)
+	dAuthenticator = authD.NewDigestAuthenticator("Authorization", getDigestHash)
+	bAuthenticator = authD.NewBasicAuthenticator("Authorization", getBasicHash)
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
 		log.Error("WebAuth config file not exists - use default")
@@ -73,15 +73,15 @@ func ConfigureFromFile(configFile string) WebAuthConfig {
 	}
 	//Interpret network lists
 	for idx, item := range Configuration.AuthOptions {
-		item.Ipnets, err = ParseNetworkList(item.Networks)
+		item.Ipnets, err = parseNetworkList(item.Networks)
 		if err != nil {
 			log.Panicf("Unable interpret networks line %d  %s  %s", idx, item.Networks, err.Error())
 		}
 	}
 
-	for _, item := range Configuration.AuthOptions {
-		log.Debugf("%v+++\n", item.Ipnets)
-	}
+	/*for _, item := range Configuration.AuthOptions {
+		log.Debugf("Configuration.AuthOption: Ipnets-%v-", item.Ipnets)
+	}*/
 
 	//Interpret user accounts, build base64 of account:passw pairs for basic auth
 	for _, v := range Configuration.UserAccounts {

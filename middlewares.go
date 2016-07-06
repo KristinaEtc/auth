@@ -39,13 +39,10 @@ func MultiAuthMiddleware() gin.HandlerFunc {
 			log.Warnf("Error IP conversion from %s", c.ClientIP())
 		}
 		c.Set("a", a)
-		log.Debugf("MultiAuthMiddleware: %v\n", a)
-
-		log.Debug(a.uri)
-		log.Debug(a.verb)
+		log.Debugf("MultiAuthMiddleware: %v", a)
 
 		// check if client has access for such uri (in configuration repository: file, DB, map of struct, etc...)
-		a.uri_lst = GetUriPatterns(Configuration.AuthOptions, a.uri, a.verb)
+		a.uri_lst = getUriPatterns(Configuration.AuthOptions, a.uri, a.verb)
 		if len(a.uri_lst) == 0 {
 			log.Warnf("URI pattern not found [%s]", a.queryTitle)
 			//c.String(403, "No route")
@@ -56,9 +53,9 @@ func MultiAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		//TODO: add ipv6  support! (in chrome natively)
-		//check if clients network is enabled in found patterns
-		a.uri_lst = GetNetworkIsEnabled(a.uri_lst, a.ip)
+		//TODO: add ipv6  support! (in Chrome natively)
+		//check if client's network is enabled in founded patterns
+		a.uri_lst = getNetworkIsEnabled(a.uri_lst, a.ip)
 		if len(a.uri_lst) == 0 {
 			log.Warnf("Forbidden network %s", a.queryTitle)
 			c.JSON(403, gin.H{
@@ -69,7 +66,7 @@ func MultiAuthMiddleware() gin.HandlerFunc {
 		}
 
 		// check authentication for a client
-		a.authType = GetAuthType(Configuration.AuthOptions, a.uri, a.verb)
+		a.authType = getAuthType(Configuration.AuthOptions, a.uri, a.verb)
 		c.Next()
 	}
 }
@@ -95,7 +92,6 @@ func DigestAuthMiddleware() (result gin.HandlerFunc) {
 				// if he didn't - setting a header with digest request
 				ar := &dAuth.AuthenticatedRequest{Request: *r, Username: username}
 				if authinfo != nil {
-					log.Debug("check")
 					w.Header().Set("Authentication-Info", *authinfo)
 					//c.Next()
 				}
@@ -119,10 +115,18 @@ func BasicAuthMiddleware() (result gin.HandlerFunc) {
 
 			if username := bAuthenticator.CheckAuth(r); username == "" {
 				bAuthenticator.RequireAuth(w, r)
+				log.WithFields(slf.Fields{"func": "BasicAuthMiddleware()"}).Debug("Authorization failed")
 				c.Abort()
 			} else {
+				log.WithFields(slf.Fields{
+					"func": "BasicAuthMiddleware()",
+				}).Debugf("Authorization Required %s", reqAuthParams.queryTitle)
+
 				ar := &dAuth.AuthenticatedRequest{Request: *r, Username: username}
 				c.Request = &ar.Request
+				log.WithFields(slf.Fields{
+					"func": "BasicAuthMiddleware()",
+				}).Debugf("User %s has been logged", username)
 				return
 			}
 		}
@@ -140,3 +144,40 @@ func MiddlewareSecond() gin.HandlerFunc {
 		log.Debug("Test Middleware Second")
 	}
 }
+
+//Parse IP addr in CIDR format (addr/bits)
+func splitNetAddrV4(addr string) (ipnet *net.IPNet, err error) {
+	if addr == "*" || addr == "" {
+		addr = "0.0.0.0/32"
+	}
+	if !strings.Contains(addr, "/") {
+		addr += "/32"
+	}
+	_, ipnet, err = net.ParseCIDR(addr)
+	return
+}
+
+//Convert string network list to list in IPnet format
+func parseNetworkList(acllist string) ([]net.IPNet, error) {
+	var ipnets []net.IPNet
+	acllist = strings.Replace(acllist, ",", " ", -1)
+	acllist = strings.Replace(acllist, ";", " ", -1)
+	acl_fields := strings.Fields(acllist)
+	for _, field := range acl_fields {
+		ipnet, err := splitNetAddrV4(field)
+		if err != nil {
+			return nil, err
+		}
+		ipnets = append(ipnets, *ipnet)
+	}
+	for _, value := range ipnets {
+		log.Debugf("\n%s", value.String())
+	}
+	return ipnets, nil
+}
+
+//Check if IP addr in string in network range
+/*func IsNetworkContainsAddr4(ip_s string, ipnet *IPNet) bool {
+	ip := ParseIP(ip_s)
+	return ipnet.Contains(ip)
+}*/
