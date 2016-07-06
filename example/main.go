@@ -3,14 +3,14 @@ package main
 import _ "github.com/KristinaEtc/slflog"
 
 import (
-	auth "github.com/KristinaEtc/auth/auth"
+	auth "github.com/KristinaEtc/auth"
 	gin "github.com/gin-gonic/gin"
 	"github.com/ventu-io/slf"
 )
 
 func main() {
 
-	log := slf.WithContext("stomp-client.go")
+	log := slf.WithContext("auth-main.go")
 	log.Info("test")
 
 	auth.ConfigureFromFile("./webauth.json")

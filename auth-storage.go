@@ -92,3 +92,4 @@ func (f *FileRepository) FindUser(login string) (*UserData, bool) {
 	return nil, false
 }
 */
+S

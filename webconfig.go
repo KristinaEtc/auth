@@ -1,21 +1,23 @@
 package auth
 
 import (
+	"github.com/KristinaEtc/auth/netutils"
+	authD "github.com/abbot/go-http-auth"
+	. "github.com/ahmetalpbalkan/go-linq"
+	"github.com/ventu-io/slf"
+
 	"encoding/base64"
 	"encoding/json"
-	"github.com/ventu-io/slf"
 	"net"
 	"os"
 	"strings"
-	. "tekinsoft/baseUtils"
-	"tekinsoft/netUtils"
-	//	"tekinsoft/webauth"
-	authD "github.com/abbot/go-http-auth"
-	//"time"
 )
 
+var Configuration WebAuthConfig = WebAuthConfig{}
+
 var (
-	Configuration WebAuthConfig = WebAuthConfig{}
+	dAuthenticator *authD.DigestAuth
+	bAuthenticator *authD.BasicAuth
 )
 
 //AuthOption, one item configuration (json)
@@ -47,17 +49,14 @@ type WebAuthConfig struct {
 	BindingAddr  string //format IP:PORT
 }
 
-var dAuthenticator *authD.DigestAuth
-var bAuthenticator *authD.BasicAuth
-
 //Load appropriate json configuration into Config structure. Parse and prepare some fields
 func ConfigureFromFile(configFile string) WebAuthConfig {
 	log = slf.WithContext(pwdCurr)
 
 	log.Debugf("Configure with config file %s", configFile)
 
-	dAuthenticator = authD.NewDigestAuthenticator("Digest authorization", SecretD)
-	bAuthenticator = authD.NewBasicAuthenticator("Basic authorization", SecretB)
+	dAuthenticator = authD.NewDigestAuthenticator("Authorization", GetDigestHash)
+	bAuthenticator = authD.NewBasicAuthenticator("Authorization", GetBasicHash)
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
 		log.Error("WebAuth config file not exists - use default")
@@ -75,7 +74,7 @@ func ConfigureFromFile(configFile string) WebAuthConfig {
 	}
 	//Interpret network lists
 	for idx, item := range Configuration.AuthOptions {
-		item.Ipnets, err = netUtils.ParseNetworkList(item.Networks)
+		item.Ipnets, err = netutils.ParseNetworkList(item.Networks)
 		if err != nil {
 			log.Panicf("Unable interpret networks line %d  %s  %s", idx, item.Networks, err.Error())
 		}
@@ -106,7 +105,7 @@ func ConfigureFromFile(configFile string) WebAuthConfig {
 			user.Groups = strings.Replace(user.Groups, ";", " ", -1)
 			uGroups := strings.Fields(user.Groups)
 			for _, ugrp := range uGroups {
-				if SliceContains(aGroups, ugrp) && !SliceContains(authItem.users, user) {
+				if sliceContains(aGroups, ugrp) && !sliceContains(authItem.users, user) {
 					authItem.users = append(authItem.users, user)
 					log.Debugf("ADD USER [%s] to [%d] by group [%s]", user.User, idx, ugrp)
 				}
@@ -118,4 +117,12 @@ func ConfigureFromFile(configFile string) WebAuthConfig {
 	log.Debugf("%d BasicAccounts items: %v", len(Configuration.UserAccounts), Configuration.UserAccounts)
 	log.Debugf("%d AuthOptions items: %v", len(Configuration.AuthOptions), Configuration.AuthOptions)
 	return Configuration
+}
+
+//check if item in slice. Based on linq
+func sliceContains(lst T, item T) bool {
+	res, _ := From(lst).Where(func(a T) (bool, error) {
+		return item == a, nil
+	}).Any()
+	return res
 }

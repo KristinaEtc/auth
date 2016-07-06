@@ -2,10 +2,9 @@ package auth
 
 import (
 	dAuth "github.com/abbot/go-http-auth"
-	//webauth "tekinsoft/web"
-
 	"github.com/gin-gonic/gin"
 	"github.com/ventu-io/slf"
+
 	"net"
 	"strings"
 )

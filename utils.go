@@ -1,27 +1,10 @@
 package auth
 
-import (
-	"net"
-	//"time"
-)
+import "net"
 
-//in processing-----------------------------------------
-
-func SecretD(user, realm string) string {
-	if user == "john" {
-		return "b98e16cbc3d01734b264adba7baa3bf9"
-	}
-	return ""
-}
-
-func SecretB(user, realm string) string {
-	if user == "john" {
-		return "b98e16cbc3d01734b264adba7baa3bf9"
-	}
-	return ""
-}
-
-func CheckDigestHash(user, realm string) string {
+// A function that search digest user information
+// and send it to digest auth middleware
+func GetDigestHash(user, realm string) string {
 	for _, userInfo := range Configuration.UserAccounts {
 		if userInfo.User == user {
 			return userInfo.DigestHash
@@ -30,7 +13,9 @@ func CheckDigestHash(user, realm string) string {
 	return ""
 }
 
-func CheckBasicHash(user, realm string) string {
+// A function that search basic user information
+// and send it to basic auth middleware
+func GetBasicHash(user, realm string) string {
 	for _, userInfo := range Configuration.UserAccounts {
 		if userInfo.User == user {
 			return userInfo.Pass
@@ -38,8 +23,6 @@ func CheckBasicHash(user, realm string) string {
 	}
 	return ""
 }
-
-//---------------------------------------------------
 
 //find in auth options list by pattern URI and VERB
 func GetUriPatterns(lst []*AuthOptionItem, uri string, verb string) (res []*AuthOptionItem) {
