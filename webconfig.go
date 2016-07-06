@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"github.com/KristinaEtc/auth/netutils"
 	authD "github.com/abbot/go-http-auth"
 	. "github.com/ahmetalpbalkan/go-linq"
 	"github.com/ventu-io/slf"
@@ -74,7 +73,7 @@ func ConfigureFromFile(configFile string) WebAuthConfig {
 	}
 	//Interpret network lists
 	for idx, item := range Configuration.AuthOptions {
-		item.Ipnets, err = netutils.ParseNetworkList(item.Networks)
+		item.Ipnets, err = ParseNetworkList(item.Networks)
 		if err != nil {
 			log.Panicf("Unable interpret networks line %d  %s  %s", idx, item.Networks, err.Error())
 		}

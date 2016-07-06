@@ -1,18 +1,9 @@
-package netutils
+package auth
 
 import (
-	"github.com/ventu-io/slf"
 	"net"
 	"strings"
 )
-
-var log slf.StructuredLogger
-
-const pwdCurr string = "auth/netutils"
-
-func init() {
-	log = slf.WithContext(pwdCurr)
-}
 
 //Parse IP addr in CIDR format (addr/bits)
 func SplitNetAddrV4(addr string) (ipnet *net.IPNet, err error) {
