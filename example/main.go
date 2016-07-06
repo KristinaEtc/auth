@@ -4,7 +4,6 @@ import _ "github.com/KristinaEtc/slflog"
 
 import (
 	auth "github.com/KristinaEtc/auth/auth"
-	//authD "github.com/abbot/go-http-auth"
 	gin "github.com/gin-gonic/gin"
 	"github.com/ventu-io/slf"
 )
