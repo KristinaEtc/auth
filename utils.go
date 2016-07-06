@@ -12,7 +12,7 @@ import (
 func getDigestHash(user, realm string) string {
 	for _, userInfo := range Configuration.UserAccounts {
 		if userInfo.User == user {
-			return getMd5(userInfo.Pass)
+			return getMd5(user + ":" + realm + ":" + userInfo.Pass)
 		}
 	}
 	return ""
@@ -24,7 +24,7 @@ func getMd5(s string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-// MD5Hash for password
+// MD5Hash for password with basic authorization
 func getCrypt(password string) string {
 	md5 := string(dAuth.MD5Crypt([]byte(password), []byte(""), []byte("$$")))
 	return md5

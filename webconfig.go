@@ -19,6 +19,8 @@ var (
 	bAuthenticator *authD.BasicAuth
 )
 
+const realm string = ""
+
 //AuthOption, one item configuration (json)
 type AuthOptionItem struct {
 	Verb     string //GET, POST... *
@@ -54,6 +56,8 @@ func ConfigureFromFile(configFile string) WebAuthConfig {
 
 	log.Debugf("Configure with config file %s", configFile)
 
+	// "Authorization" is a realm for request
+	// the 2th parameter it a function that returns md5 hash of user/pws
 	dAuthenticator = authD.NewDigestAuthenticator("Authorization", getDigestHash)
 	bAuthenticator = authD.NewBasicAuthenticator("Authorization", getBasicHash)
 

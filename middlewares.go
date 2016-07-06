@@ -36,7 +36,9 @@ func MultiAuthMiddleware() gin.HandlerFunc {
 		}
 		a.ip = net.ParseIP(a.addr)
 		if a.ip == nil {
-			log.Warnf("Error IP conversion from %s", c.ClientIP())
+			log.WithFields(slf.Fields{
+				"func": "MultiAuthMiddleware()",
+			}).Warnf("Error IP conversion from %s", c.ClientIP())
 		}
 		c.Set("a", a)
 		log.Debugf("MultiAuthMiddleware: %v", a)
@@ -44,7 +46,10 @@ func MultiAuthMiddleware() gin.HandlerFunc {
 		// check if client has access for such uri (in configuration repository: file, DB, map of struct, etc...)
 		a.uri_lst = getUriPatterns(Configuration.AuthOptions, a.uri, a.verb)
 		if len(a.uri_lst) == 0 {
-			log.Warnf("URI pattern not found [%s]", a.queryTitle)
+			log.WithFields(slf.Fields{
+				"func": "MultiAuthMiddleware()",
+			}).Warnf("URI pattern not found [%s]", a.queryTitle)
+
 			//c.String(403, "No route")
 			c.JSON(403, gin.H{
 				"message": "No route",
@@ -53,11 +58,11 @@ func MultiAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		//TODO: add ipv6  support! (in Chrome natively)
+		//TODO: add ipv6 support! (in Chrome natively)
 		//check if client's network is enabled in founded patterns
 		a.uri_lst = getNetworkIsEnabled(a.uri_lst, a.ip)
 		if len(a.uri_lst) == 0 {
-			log.Warnf("Forbidden network %s", a.queryTitle)
+			log.WithFields(slf.Fields{"func": "MultiAuthMiddleware()"}).Warnf("Forbidden network %s", a.queryTitle)
 			c.JSON(403, gin.H{
 				"message": "Forbidden network",
 			})
@@ -74,7 +79,7 @@ func MultiAuthMiddleware() gin.HandlerFunc {
 // A middleware that implement digest authorization
 func DigestAuthMiddleware() (result gin.HandlerFunc) {
 
-	defer log.WithFields(slf.Fields{"func": "DigestAuth"})
+	defer log.WithFields(slf.Fields{"func": "DigestAuthMiddleware"})
 
 	return func(c *gin.Context) {
 		r := c.Request
@@ -87,7 +92,9 @@ func DigestAuthMiddleware() (result gin.HandlerFunc) {
 			//check if user was registered
 			if username, authinfo := dAuthenticator.CheckAuth(r); username == "" {
 				dAuthenticator.RequireAuth(w, r)
+				log.WithFields(slf.Fields{"func": "DigestAuthMiddleware()"}).Debug("Authorization failed")
 				c.Abort()
+				return
 			} else {
 				// if he didn't - setting a header with digest request
 				ar := &dAuth.AuthenticatedRequest{Request: *r, Username: username}
@@ -95,6 +102,9 @@ func DigestAuthMiddleware() (result gin.HandlerFunc) {
 					w.Header().Set("Authentication-Info", *authinfo)
 					//c.Next()
 				}
+				log.WithFields(slf.Fields{
+					"func": "DigestAuthMiddleware()",
+				}).Debugf("User %s has been logged", username)
 				c.Request = &ar.Request
 				return
 			}
