@@ -22,7 +22,7 @@ func SecretB(user, realm string) string {
 }
 
 func CheckDigestHash(user, realm string) string {
-	for _, userInfo := range webauth.Configuration.UserAccounts {
+	for _, userInfo := range Configuration.UserAccounts {
 		if userInfo.User == user {
 			return userInfo.DigestHash
 		}
@@ -31,7 +31,7 @@ func CheckDigestHash(user, realm string) string {
 }
 
 func CheckBasicHash(user, realm string) string {
-	for _, userInfo := range webauth.Configuration.UserAccounts {
+	for _, userInfo := range Configuration.UserAccounts {
 		if userInfo.User == user {
 			return userInfo.Pass
 		}
