@@ -21,6 +21,24 @@ func SecretB(user, realm string) string {
 	return ""
 }
 
+func CheckDigestHash(user, realm string) string {
+	for _, userInfo := range webauth.Configuration.UserAccounts {
+		if userInfo.User == user {
+			return userInfo.DigestHash
+		}
+	}
+	return ""
+}
+
+func CheckBasicHash(user, realm string) string {
+	for _, userInfo := range webauth.Configuration.UserAccounts {
+		if userInfo.User == user {
+			return userInfo.Pass
+		}
+	}
+	return ""
+}
+
 //---------------------------------------------------
 
 //find in auth options list by pattern URI and VERB

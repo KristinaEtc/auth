@@ -77,24 +77,6 @@ func MultiAuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-func CheckDigestHash(user, realm string) string {
-	for _, userInfo := range webauth.Configuration.UserAccounts {
-		if userInfo.User == user {
-			return userInfo.DigestHash
-		}
-	}
-	return ""
-}
-
-func CheckBasicHash(user, realm string) string {
-	for _, userInfo := range webauth.Configuration.UserAccounts {
-		if userInfo.User == user {
-			return userInfo.Pass
-		}
-	}
-	return ""
-}
-
 // A middleware that implement digest authorization
 func DigestAuthMiddleware() (result gin.HandlerFunc) {
 
