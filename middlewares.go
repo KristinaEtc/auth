@@ -41,7 +41,7 @@ func MultiAuthMiddleware() gin.HandlerFunc {
 			}).Warnf("Error IP conversion from %s", c.ClientIP())
 		}
 		c.Set("a", a)
-		log.Debugf("MultiAuthMiddleware: %v", a)
+		log.Debugf("MultiAuthMiddleware: %v\n", a)
 
 		// check if client has access for such uri (in configuration repository: file, DB, map of struct, etc...)
 		a.uri_lst = getUriPatterns(Configuration.AuthOptions, a.uri, a.verb)
@@ -92,7 +92,7 @@ func DigestAuthMiddleware() (result gin.HandlerFunc) {
 			//check if user was registered
 			if username, authinfo := dAuthenticator.CheckAuth(r); username == "" {
 				dAuthenticator.RequireAuth(w, r)
-				log.WithFields(slf.Fields{"func": "DigestAuthMiddleware()"}).Debug("Authorization failed")
+				log.WithFields(slf.Fields{"func": "DigestAuthMiddleware()"}).Debug("Authorization required")
 				c.Abort()
 				return
 			} else {
@@ -108,6 +108,8 @@ func DigestAuthMiddleware() (result gin.HandlerFunc) {
 				c.Request = &ar.Request
 				return
 			}
+		} else {
+			return
 		}
 	}
 }
@@ -125,7 +127,7 @@ func BasicAuthMiddleware() (result gin.HandlerFunc) {
 
 			if username := bAuthenticator.CheckAuth(r); username == "" {
 				bAuthenticator.RequireAuth(w, r)
-				log.WithFields(slf.Fields{"func": "BasicAuthMiddleware()"}).Debug("Authorization failed")
+				log.WithFields(slf.Fields{"func": "BasicAuthMiddleware()"}).Debug("Authorization required")
 				c.Abort()
 			} else {
 				log.WithFields(slf.Fields{
@@ -139,15 +141,26 @@ func BasicAuthMiddleware() (result gin.HandlerFunc) {
 				}).Debugf("User %s has been logged", username)
 				return
 			}
+
+		} else {
+			return
 		}
 	}
 }
 
-/*func TrustMiddleware(a *authParams) gin.HandlerFunc {
+func TrustMiddleware() gin.HandlerFunc {
+
+	defer log.WithFields(slf.Fields{"func": "Trust Auth"})
+
 	return func(c *gin.Context) {
-		log.Debug("Trust Middleware")
+		reqAuthParams := c.MustGet("a").(*authParams)
+		if reqAuthParams.authType == "trust" {
+			c.Next()
+		} else {
+			return
+		}
 	}
-}*/
+}
 
 func MiddlewareSecond() gin.HandlerFunc {
 	return func(c *gin.Context) {

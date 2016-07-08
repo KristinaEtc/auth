@@ -13,10 +13,11 @@ func main() {
 	log := slf.WithContext("auth-main.go")
 	log.Info("test")
 
-	auth.ConfigureFromFile("./webauth.json")
+	auth.ConfigureFromFile("./webauthExample.json")
 	r := gin.New()
 
 	r.Use(auth.MultiAuthMiddleware(),
+		auth.TrustMiddleware(),
 		auth.BasicAuthMiddleware(),
 		auth.DigestAuthMiddleware(),
 		auth.MiddlewareSecond(),
