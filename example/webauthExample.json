@@ -8,7 +8,7 @@
     ],
 
     "useraccounts": [
-         {"user" : "user1" ,  "pass" : "111",   "groups" : "group1"},
+         {"user" : "creature" ,  "pass" : "hello from freenode #belarus",   "groups" : "group1"},
          {"user" : "user2" ,  "pass" : "222",  "groups"  : "group2"}
     ]
 
