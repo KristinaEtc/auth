@@ -36,13 +36,6 @@ func indexPageHandler(c *gin.Context) {
 	c.HTML(200, "index.html", nil)
 }
 
-//func internalPageHandler(response http.ResponseWriter, request *http.Request) {
-/*func CheckCookies() gin.HandlerFunc {
-	return func(c *gin.Context) {
-
-	}
-}*/
-
 func main() {
 
 	log = slf.WithContext("auth-main.go")
@@ -62,22 +55,20 @@ func main() {
 	r.GET("/", indexPageHandler)
 
 	r.POST("/monitoring", func(c *gin.Context) {
-		defer log.WithFields(slf.Fields{"func": "CheckCookies"})
+		defer log.WithFields(slf.Fields{"func": "/monitoring handler"})
 		session := sessions.Default(c)
 		userName := session.Get("name")
 
 		if userName != "" {
 			//fmt.Fprintf(response, internalPage, userName)
 			log.Debug(userName.(string))
-			c.HTML(http.StatusOK, "index3.html", nil)
+			c.HTML(http.StatusOK, "monitoring.html", nil)
 		} else {
-			log.Debug("FUCK")
+			log.WithFields(slf.Fields{"endpoint=": "/monitoring"}).Debug("wrong username")
 			//http.Redirect(response, request, "/", 302)
 		}
 
 	})
-	//r.Use(CheckCookies())
-	//r.GET("/monitoring", internalPageHandler)
 
 	r.POST("/login", loginHandler)
 	//	r.POST("/logout", logoutHandler)
