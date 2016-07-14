@@ -2,9 +2,10 @@
     "bindingaddr": "0.0.0.0:8080",
 
     "authoptions": [
-        { "verb" : "*",   "uri" : "/",   "auth": "trust",   "groups" : "*",      "networks" : "192.168.1.3, 0.0.0.0,127.0.0.1" },
+        { "verb" : "*",   "uri" : "/",   "auth": "cookie",   "groups" : "*",      "networks" : "192.168.1.3, 0.0.0.0,127.0.0.1" },
+         { "verb" : "GET",   "uri" : "/static/css/main.css",   "auth": "cookie",   "groups" : "*",      "networks" : "0.0.0.0,127.0.0.1" },
         { "verb" : "*",   "uri" : "/status",   "auth": "basic",   "groups" : "group1",           "networks" : "127.0.0.1"  },
-         { "verb" : "*",   "uri" : "/monitoring",   "auth": "digest",   "groups" : "group2",           "networks" : "192.168.240.0/24, 127.0.0.1"  }
+         { "verb" : "*",   "uri" : "/monitoring",   "auth": "cookie",   "groups" : "group2",           "networks" : "192.168.240.0/24, 127.0.0.1"  }
     ],
 
     "useraccounts": [
