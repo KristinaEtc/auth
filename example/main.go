@@ -16,7 +16,8 @@ var log slf.StructuredLogger
 func main() {
 
 	log = slf.WithContext("auth-main.go")
-	log.Info("test")
+	// for readable logs
+	log.Error("-------------------------------------------------")
 
 	auth.ConfigureFromFile("./webauthExample.json")
 
