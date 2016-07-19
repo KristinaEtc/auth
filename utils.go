@@ -43,6 +43,19 @@ func getBasicHash(user, realm string) string {
 	return ""
 }
 
+func checkPwdCorrect(user, pwd string) bool {
+	for _, userInfo := range Configuration.UserAccounts {
+		if userInfo.User == user {
+			if userInfo.Pass == pwd {
+				return true
+			}
+			// Now configfile stored pure password;
+			// it's easier to testing a program
+		}
+	}
+	return false
+}
+
 //find in auth options list by pattern URI and VERB
 func getUriPatterns(lst []*AuthOptionItem, uri string, verb string) (res []*AuthOptionItem) {
 

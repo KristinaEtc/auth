@@ -124,6 +124,7 @@ func BasicAuthMiddleware() (result gin.HandlerFunc) {
 		reqAuthParams := c.MustGet("a").(*authParams)
 
 		if reqAuthParams.authType == "basic" {
+			log.Debug("ee")
 
 			if username := bAuthenticator.CheckAuth(r); username == "" {
 				bAuthenticator.RequireAuth(w, r)
