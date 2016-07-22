@@ -20,7 +20,7 @@ func main() {
 	// for readable logs
 	log.Error("-------------------------------------------------")
 
-	auth.ConfigureFromFile("./webauthExample.json")
+	auth.ConfigureFromFile("./webauth.json")
 
 	r := gin.Default()
 	r.Use(gin.Logger())

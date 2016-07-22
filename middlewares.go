@@ -14,14 +14,15 @@ type authParams struct {
 	verb             string
 	addr             string
 	ip               net.IP
-	basic_decoded    string
-	uri_lst          []*AuthOptionItem
+	basicDecoded     string
+	uriLst           []*GlobalAuthOptionItem
 	user             string
 	hdrAuthorization string
 	queryTitle       string
 	authType         string
 }
 
+//MultiAuthMiddleware is a global middleware for parsing request information
 func MultiAuthMiddleware() gin.HandlerFunc {
 
 	log.Debug("MultiAuthMiddleware")
@@ -44,8 +45,8 @@ func MultiAuthMiddleware() gin.HandlerFunc {
 		log.Debugf("MultiAuthMiddleware: %v\n", a)
 
 		// check if client has access for such uri (in configuration repository: file, DB, map of struct, etc...)
-		a.uri_lst = getUriPatterns(Configuration.AuthOptions, a.uri, a.verb)
-		if len(a.uri_lst) == 0 {
+		a.uriLst = getURIpatterns(Configuration.AuthOptions, a.uri, a.verb)
+		if len(a.uriLst) == 0 {
 			log.WithFields(slf.Fields{
 				"func": "MultiAuthMiddleware()",
 			}).Warnf("URI pattern not found [%s]", a.queryTitle)
@@ -60,8 +61,8 @@ func MultiAuthMiddleware() gin.HandlerFunc {
 
 		//TODO: add ipv6 support! (in Chrome natively)
 		//check if client's network is enabled in founded patterns
-		a.uri_lst = getNetworkIsEnabled(a.uri_lst, a.ip)
-		if len(a.uri_lst) == 0 {
+		a.uriLst = getNetworkIsEnabled(a.uriLst, a.ip)
+		if len(a.uriLst) == 0 {
 			log.WithFields(slf.Fields{"func": "MultiAuthMiddleware()"}).Warnf("Forbidden network %s", a.queryTitle)
 			c.JSON(403, gin.H{
 				"message": "Forbidden network",
@@ -76,7 +77,7 @@ func MultiAuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-// A middleware that implement digest authorization
+// DigestAuthMiddleware is a middleware that implement digest authorization
 func DigestAuthMiddleware() (result gin.HandlerFunc) {
 
 	defer log.WithFields(slf.Fields{"func": "DigestAuthMiddleware"})
@@ -94,7 +95,6 @@ func DigestAuthMiddleware() (result gin.HandlerFunc) {
 				dAuthenticator.RequireAuth(w, r)
 				log.WithFields(slf.Fields{"func": "DigestAuthMiddleware()"}).Debug("Authorization required")
 				c.Abort()
-				return
 			} else {
 				// if he didn't - setting a header with digest request
 				ar := &dAuth.AuthenticatedRequest{Request: *r, Username: username}
@@ -106,14 +106,14 @@ func DigestAuthMiddleware() (result gin.HandlerFunc) {
 					"func": "DigestAuthMiddleware()",
 				}).Debugf("User %s has been logged", username)
 				c.Request = &ar.Request
-				return
 			}
-		} else {
+		} /*else {
 			return
-		}
+		}*/
 	}
 }
 
+// BasicAuthMiddleware is a middleware that implement basic authorization
 func BasicAuthMiddleware() (result gin.HandlerFunc) {
 
 	defer log.WithFields(slf.Fields{"func": "Basic Auth"})
@@ -149,6 +149,7 @@ func BasicAuthMiddleware() (result gin.HandlerFunc) {
 	}
 }
 
+// TrustMiddleware is a middleware that implement trust authorization
 func TrustMiddleware() gin.HandlerFunc {
 
 	defer log.WithFields(slf.Fields{"func": "Trust Auth"})
@@ -163,11 +164,11 @@ func TrustMiddleware() gin.HandlerFunc {
 	}
 }
 
-func MiddlewareSecond() gin.HandlerFunc {
+/*func MiddlewareSecond() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Debug("Test Middleware Second")
 	}
-}
+}*/
 
 //Parse IP addr in CIDR format (addr/bits)
 func splitNetAddrV4(addr string) (ipnet *net.IPNet, err error) {
@@ -186,8 +187,8 @@ func parseNetworkList(acllist string) ([]net.IPNet, error) {
 	var ipnets []net.IPNet
 	acllist = strings.Replace(acllist, ",", " ", -1)
 	acllist = strings.Replace(acllist, ";", " ", -1)
-	acl_fields := strings.Fields(acllist)
-	for _, field := range acl_fields {
+	aclFields := strings.Fields(acllist)
+	for _, field := range aclFields {
 		ipnet, err := splitNetAddrV4(field)
 		if err != nil {
 			return nil, err

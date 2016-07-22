@@ -1,18 +1,19 @@
 package auth
 
 import (
-	authD "github.com/abbot/go-http-auth"
-	. "github.com/ahmetalpbalkan/go-linq"
-	"github.com/ventu-io/slf"
-
 	"encoding/base64"
 	"encoding/json"
 	"net"
 	"os"
 	"strings"
+
+	authD "github.com/abbot/go-http-auth"
+	. "github.com/ahmetalpbalkan/go-linq"
+	"github.com/ventu-io/slf"
 )
 
-var Configuration WebAuthConfig = WebAuthConfig{}
+// Configuration is a struct with all request data
+var Configuration = WebAuthConfig{}
 
 var (
 	dAuthenticator *authD.DigestAuth
@@ -21,8 +22,8 @@ var (
 
 const realm string = ""
 
-//AuthOption, one item configuration (json)
-type AuthOptionItem struct {
+//GlobalAuthOptionItem is a struct with item configuration (for json parsing)
+type GlobalAuthOptionItem struct {
 	Verb     string //GET, POST... *
 	URI      string //path /,*,...
 	Auth     string //basic, trust
@@ -33,7 +34,7 @@ type AuthOptionItem struct {
 	users  []*UserAccountItem //users,  joined by groups
 }
 
-//user-password-group structures (json)
+// UserAccountItem is a user-password-group structure (for json parsing)
 type UserAccountItem struct {
 	User       string //login
 	Pass       string //password
@@ -43,14 +44,15 @@ type UserAccountItem struct {
 	base64value string //base64 interpreted login and passord, for basic auth
 }
 
-//Common config structure (json-based and automatic interpreted)
+//WebAuthConfig is a common config structure (json-based and automatic interpreted)
 type WebAuthConfig struct {
 	UserAccounts []*UserAccountItem
-	AuthOptions  []*AuthOptionItem
+	AuthOptions  []*GlobalAuthOptionItem
 	BindingAddr  string //format IP:PORT
 }
 
-//Load appropriate json configuration into Config structure. Parse and prepare some fields
+//ConfigureFromFile is a function for load appropriate json configuration into Config structure.
+//Parse and prepare some fields
 func ConfigureFromFile(configFile string) WebAuthConfig {
 	log = slf.WithContext(pwdCurr)
 

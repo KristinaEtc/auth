@@ -10,7 +10,7 @@ import (
 	//	"strings"
 )
 
-// A middleware that implement digest authorization
+// CookieMiddleware is a middleware that implement digest authorization
 func CookieMiddleware() (result gin.HandlerFunc) {
 
 	defer log.WithFields(slf.Fields{"func": "CookieMiddleware"})
@@ -31,12 +31,10 @@ func CookieMiddleware() (result gin.HandlerFunc) {
 				c.HTML(200, "login.html", nil)
 				log.Warn("An attempt to enter without cookies")
 				c.Abort()
-				return
 			} else {
 				if username == "" && password == "" {
 					log.Debug("username == \" \" && password == \" \"")
 					c.Abort()
-					return
 				}
 			}
 		}

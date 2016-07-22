@@ -3,8 +3,9 @@ package auth
 import (
 	"crypto/md5"
 	"encoding/hex"
-	dAuth "github.com/abbot/go-http-auth"
 	"net"
+
+	dAuth "github.com/abbot/go-http-auth"
 )
 
 // A function that search digest user information
@@ -57,7 +58,7 @@ func checkPwdCorrect(user, pwd string) bool {
 }
 
 //find in auth options list by pattern URI and VERB
-func getUriPatterns(lst []*AuthOptionItem, uri string, verb string) (res []*AuthOptionItem) {
+func getURIpatterns(lst []*GlobalAuthOptionItem, uri string, verb string) (res []*GlobalAuthOptionItem) {
 
 	for _, item := range lst {
 		//log.Debugf("getUriPatterns/item.URI=%s/item.Verb=%s", item.URI, item.Verb)
@@ -69,7 +70,7 @@ func getUriPatterns(lst []*AuthOptionItem, uri string, verb string) (res []*Auth
 	return
 }
 
-func getAuthType(lst []*AuthOptionItem, uri string, verb string) (res string) {
+func getAuthType(lst []*GlobalAuthOptionItem, uri string, verb string) (res string) {
 	for _, item := range lst {
 		//log.Debugf("getAuthType/item.URI=%s/item.Verb=%s", item.URI, item.Verb)
 		if (item.URI == uri || item.URI == "*") && (item.Verb == verb || item.Verb == "*") {
@@ -82,7 +83,7 @@ func getAuthType(lst []*AuthOptionItem, uri string, verb string) (res string) {
 }
 
 //compare clients addr and internal ACL list. Return true in one of networks contains IP
-func getNetworkIsEnabled(lst []*AuthOptionItem, ip net.IP) (res []*AuthOptionItem) {
+func getNetworkIsEnabled(lst []*GlobalAuthOptionItem, ip net.IP) (res []*GlobalAuthOptionItem) {
 	//log.Debugf("getNetworkIsEnabled:ip.String()=%s", ip.String())
 	for _, item := range lst {
 		for _, ipnet := range item.Ipnets {
@@ -97,7 +98,7 @@ func getNetworkIsEnabled(lst []*AuthOptionItem, ip net.IP) (res []*AuthOptionIte
 }
 
 //return true it one of item in list configured with "trust" params
-func checkTrust(lst []*AuthOptionItem) bool {
+func checkTrust(lst []*GlobalAuthOptionItem) bool {
 	for _, item := range lst {
 		if item.Auth == "trust" {
 			return true
@@ -107,7 +108,7 @@ func checkTrust(lst []*AuthOptionItem) bool {
 }
 
 //check if this user joined to any Auth options from list by groups
-func checkAuthOptionsListContainsUser(lst []*AuthOptionItem, user *UserAccountItem) bool {
+func checkAuthOptionsListContainsUser(lst []*GlobalAuthOptionItem, user *UserAccountItem) bool {
 	for _, item := range lst {
 		for _, uitem := range item.users {
 			if uitem == user {

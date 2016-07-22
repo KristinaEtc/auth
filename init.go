@@ -14,6 +14,7 @@ func init() {
 	log = slf.WithContext(pwdCurr)
 }
 
+// InitAuthMiddlewares is a function for init middlewares
 func InitAuthMiddlewares(r **gin.Engine, g **gin.RouterGroup, pageAfterLogin string) {
 
 	//(*r).LoadHTMLGlob("templates/*.html")
@@ -27,10 +28,9 @@ func InitAuthMiddlewares(r **gin.Engine, g **gin.RouterGroup, pageAfterLogin str
 		TrustMiddleware(),
 		BasicAuthMiddleware(),
 		DigestAuthMiddleware(),
-		MiddlewareSecond(),
 		CookieMiddleware(),
 	)
 
-	(*r).GET("/", loginRoute(pageAfterLogin))
+	//	(*r).GET("/", loginRoute(pageAfterLogin))
 	(*r).POST("/login", loginRoute(pageAfterLogin))
 }
