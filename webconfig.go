@@ -54,7 +54,7 @@ type WebAuthConfig struct {
 func ConfigureFromFile(configFile string) WebAuthConfig {
 	log = slf.WithContext(pwdCurr)
 
-	log.Debugf("Configure with config file %s", configFile)
+	log.Debugf("Using config file %s", configFile)
 
 	// "Authorization" is a realm for request
 	// the 2th parameter it a function that returns md5 hash of user/pws
@@ -62,24 +62,24 @@ func ConfigureFromFile(configFile string) WebAuthConfig {
 	bAuthenticator = authD.NewBasicAuthenticator("Authorization", getBasicHash)
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		log.Error("WebAuth config file not exists - use default")
+		log.Error("WebAuth config file does not exist - use default")
 		return Configuration
 	}
 	//Open config file
 	file, err := os.Open(configFile)
 	if err != nil {
-		log.Panicf("Error load WebAuth config file: [%s]  %s", configFile, err)
+		log.Panicf("Error loading WebAuth config file: [%s]  %s", configFile, err)
 	}
 	//JSON parse
 	decoder := json.NewDecoder(file)
 	if err = decoder.Decode(&Configuration); err != nil {
-		log.Panicf("Unable interpret config file: %s", err.Error())
+		log.Panicf("Cannot parse config file: %s", err.Error())
 	}
 	//Interpret network lists
 	for idx, item := range Configuration.AuthOptions {
 		item.Ipnets, err = parseNetworkList(item.Networks)
 		if err != nil {
-			log.Panicf("Unable interpret networks line %d  %s  %s", idx, item.Networks, err.Error())
+			log.Panicf("Cannot parse networks line %d  %s  %s", idx, item.Networks, err.Error())
 		}
 	}
 
